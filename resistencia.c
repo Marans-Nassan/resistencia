@@ -13,10 +13,11 @@
 #define ADC_PIN 28 // GPIO para o voltímetro
 #define Botao_A 5  // GPIO para botão A
 
-int R_conhecido = 10000;   // Resistor de 10k ohm
+int R_conhecido = 47000;   // Resistor de 47k ohm
 float R_x = 0.0;           // Resistor desconhecido
 float ADC_VREF = 3.31;     // Tensão de referência do ADC
 int ADC_RESOLUTION = 4095; // Resolução do ADC (12 bits)
+float R_x_original = 0.0;
 
 // Trecho para modo BOOTSEL com botão B
 #include "pico/bootrom.h"
@@ -76,12 +77,16 @@ int main()
     float media = soma / 500.0f;
 
       // Fórmula simplificada: R_x = R_conhecido * ADC_encontrado /(ADC_RESOLUTION - adc_encontrado)
-      R_x = (R_conhecido * media) / (ADC_RESOLUTION - media);
-        if(R_x >= 510 && R_x < 560) {
-          ssd1306_draw_string(&ssd, "Verde - Faixa 1", 8, 6); 
-          ssd1306_draw_string(&ssd, "Marrom - Faixa 2", 8, 16); 
-          ssd1306_draw_string(&ssd, "Marrom - Faixa 3", 8, 28); 
-        }
+      R_x_original = (R_conhecido * media) / (ADC_RESOLUTION - media);
+      R_x = R_x_original;
+      if(R_x_original < 800) R_x = R_x_original * 0.70;
+      else if(R_x_original <900) R_x = R_x_original *0.75;
+      else if(R_x_original <1500) R_x = R_x_original *0.82;
+      else if(R_x_original <2500) R_x = R_x_original *0.88;
+      else if(R_x_original <8000) R_x = R_x_original * 0.93;
+      else if(R_x_original <50000) R_x = R_x_original * 1.02;
+      else R_x = R_x_original * 1.10;
+
     sprintf(str_x, "%1.0f", media); // Converte o inteiro em string
     sprintf(str_y, "%1.0f", R_x);   // Converte o float em string
     
@@ -91,8 +96,8 @@ int main()
     ssd1306_rect(&ssd, 3, 3, 122, 60, cor, !cor);      // Desenha um retângulo
     ssd1306_line(&ssd, 3, 25, 123, 25, cor);           // Desenha uma linha
     ssd1306_line(&ssd, 3, 37, 123, 37, cor);           // Desenha uma linha
-    ssd1306_draw_string(&ssd, "CEPEDI   TIC37", 8, 6); // Desenha uma string
-    ssd1306_draw_string(&ssd, "EMBARCATECH", 20, 16);  // Desenha uma string
+   // ssd1306_draw_string(&ssd, "CEPEDI   TIC37", 8, 6); // Desenha uma string
+   // ssd1306_draw_string(&ssd, "EMBARCATECH", 20, 16);  // Desenha uma string
     ssd1306_draw_string(&ssd, "  Ohmimetro", 10, 28);  // Desenha uma string
     ssd1306_draw_string(&ssd, "ADC", 13, 41);          // Desenha uma string
     ssd1306_draw_string(&ssd, "Resisten.", 50, 41);    // Desenha uma string
