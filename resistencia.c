@@ -8,24 +8,24 @@
 #include "lib/font.h"
 #include "lib/valorR.h"
 
-#define I2C_PORT      i2c1
-#define I2C_SDA       14
-#define I2C_SCL       15
-#define endereco      0x3C
-#define ADC_PIN       28
+#define I2C_PORT i2c1
+#define I2C_SDA 14
+#define I2C_SCL 15
+#define endereco 0x3C
+#define ADC_PIN 28
 
 // --- Parâmetros de medição ---
-int   R_conhecido       = 47000;   // Resistor de referência, 47 kΩ
-float R_x               = 0.0f;    // Valor calculado do resistor desconhecido
-int   ADC_RESOLUTION    = 4095;    // 12 bits
-float R_x_original      = 0.0f;    // Valor bruto antes de ajuste
-bool  fora_da_escala    = false;   // Flag se R_x_original está fora da faixa 510–100 kΩ
-float media             = 0.0f;    // Média das leituras do ADC
-char  str_x[6];                    // Buffer para string da média
-char  str_y[6];                    // Buffer para string de R_x
-bool  cor                = true;   // Controle de inversão de cor pra animação
+int   R_conhecido = 47000; // Resistor de referência, 47 kΩ
+float R_x  = 0.0f; // Valor calculado do resistor desconhecido
+int   ADC_RESOLUTION = 4095; // 12 bits
+float R_x_original = 0.0f; // Valor bruto antes de ajuste
+bool  fora_da_escala = false; // Flag se R_x_original está fora da faixa 510–100 kΩ
+float media = 0.0f; // Média das leituras do ADC
+char  str_x[6]; // Buffer para string da média
+char  str_y[6]; // Buffer para string de R_x
+bool  cor  = true; // Controle de inversão de cor pra animação
 
-ssd1306_t ssd;                     // Struct do display OLED
+ssd1306_t ssd; // Struct do display OLED
 
 // Protótipos
 Resistor* encontra_resistor(float Rx);
@@ -48,15 +48,11 @@ int main() {
     adcinit();
 
     while (true) {
-        // 1) Mede e calcula média do ADC
-        media = media_adc();
-
-        // 2) Calcula valor bruto do resistor (antes de correções)
-        R_x_original = calculo_Rx_original(media);
-
-        // 3) Aplica fator de correção ou sinaliza fora da faixa
-        fora_da_escala = ajuste_Rx(R_x_original, &R_x);
-
+        
+      media = media_adc(); // 1) Mede e calcula média do ADC
+      R_x_original = calculo_Rx_original(media); // 2) Calcula valor bruto do resistor (antes de correções)
+      fora_da_escala = ajuste_Rx(R_x_original, &R_x); // 3) Aplica fator de correção ou sinaliza fora da faixa
+        
         // 4) Se estiver na faixa, encontra as cores correspondentes
         Resistor* sel = NULL;
         if (!fora_da_escala) {
