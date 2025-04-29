@@ -14,7 +14,6 @@
 #define endereco 0x3C
 #define ADC_PIN 28
 
-// --- Parâmetros de medição ---
 int   R_conhecido = 47000; // Resistor de referência, 47 kΩ
 float R_x  = 0.0f; // Valor calculado do resistor desconhecido
 int   ADC_RESOLUTION = 4095; // 12 bits
